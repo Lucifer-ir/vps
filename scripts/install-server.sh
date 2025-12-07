@@ -21,23 +21,44 @@ echo "Updating system packages..."
 apt-get update
 apt-get upgrade -y
 
+# Install required packages (ensure curl/git exist before using them)
+echo "Installing required packages..."
+apt-get install -y curl wget git ca-certificates openssl sqlite3
+
 # Install Node.js and npm
 echo "Installing Node.js..."
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 apt-get install -y nodejs
-
-# Install required packages
-echo "Installing required packages..."
-apt-get install -y curl wget git
 
 # Create app directory
 APP_DIR="/opt/vpn-server"
 mkdir -p $APP_DIR
 cd $APP_DIR
 
-# Copy application files
-echo "Setting up application..."
-cp -r /tmp/vpn-backend/* .
+# Ensure application files are present in /tmp/vpn-backend
+if [ ! -d /tmp/vpn-backend ]; then
+    echo "Downloading application files to /tmp/vpn-backend..."
+    if command -v git >/dev/null 2>&1; then
+        git clone https://github.com/Lucifer-ir/vps.git /tmp/vpn-backend || { echo "git clone failed"; exit 1; }
+    else
+        echo "git not available to fetch repository. Please place backend files in /tmp/vpn-backend and re-run.";
+        exit 1
+    fi
+fi
+
+# Locate backend source inside the downloaded repo
+if [ -d /tmp/vpn-backend/src/backend ]; then
+    SRC_PATH="/tmp/vpn-backend/src/backend"
+elif [ -f /tmp/vpn-backend/server.js ]; then
+    SRC_PATH="/tmp/vpn-backend"
+else
+    echo "Cannot find backend files in /tmp/vpn-backend. Listing contents for debugging:";
+    ls -la /tmp/vpn-backend || true
+    exit 1
+fi
+
+echo "Setting up application from $SRC_PATH..."
+cp -r "$SRC_PATH/"* .
 
 # Install dependencies
 echo "Installing Node dependencies..."
