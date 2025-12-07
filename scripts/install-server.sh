@@ -28,6 +28,12 @@ apt-get upgrade -y
 echo "Installing required packages..."
 apt-get install -y curl wget git ca-certificates openssl sqlite3
 
+# Verify curl is installed and available
+if ! command -v curl &> /dev/null; then
+    echo "curl not available, retrying install..."
+    apt-get install --reinstall -y curl
+fi
+
 # Install Node.js and npm
 echo "Installing Node.js..."
 curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
