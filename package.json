@@ -1,0 +1,29 @@
+{
+  "name": "vpn-config-system",
+  "version": "1.0.0",
+  "description": "VPN Configuration Management System",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "vpn",
+    "proxy",
+    "configuration",
+    "android",
+    "admin-panel"
+  ],
+  "author": "Your Name",
+  "license": "PROPRIETARY",
+  "scripts": {
+    "start": "cd src/backend && npm start",
+    "dev": "cd src/backend && npm run dev",
+    "install-backend": "cd src/backend && npm install",
+    "test": "cd src/backend && npm test",
+    "docker-build": "docker build -t vpn-server .",
+    "docker-run": "docker-compose up -d"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

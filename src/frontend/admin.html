@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fa" class="light" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت VPN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { direction: rtl; }
+        .dark ::-webkit-scrollbar { width: 8px; height: 8px; }
+        .dark ::-webkit-scrollbar-track { background: #1f2937; }
+        .dark ::-webkit-scrollbar-thumb { background-color: #4b5563; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb:hover { background-color: #6b7280; }
+        .btn {
+            @apply px-4 py-2 rounded-lg font-medium transition-colors;
+            @apply bg-primary-600 text-white hover:bg-primary-700;
+        }
+        .btn-small {
+            @apply px-3 py-1 text-sm;
+        }
+        .btn-danger {
+            @apply bg-red-600 hover:bg-red-700;
+        }
+        .input-field {
+            @apply w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600;
+            @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100;
+            @apply focus:outline-none focus:ring-2 focus:ring-primary-500;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- SIDEBAR -->
+        <aside id="sidebar" class="absolute z-40 left-0 top-0 h-screen w-64 -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex flex-col">
+            
+            <!-- Logo -->
+            <div class="flex items-center justify-center h-16 px-4 border-b border-gray-200 dark:border-gray-700">
+                <h1 class="text-2xl font-bold text-primary-600">VPN Panel</h1>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+                <a href="#" data-page="dashboard" class="nav-item flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 bg-gray-100 dark:bg-gray-700">
+                    <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    داشبورد
+                </a>
+                <a href="#" data-page="configs" class="nav-item flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+                    تنظیمات
+                </a>
+                <a href="#" data-page="apps" class="nav-item flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    برنامه‌های اندروید
+                </a>
+                <a href="#" data-page="users" class="nav-item flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 12H9m4 5h4m-10 0h10"></path></svg>
+                    کاربران
+                </a>
+                <a href="#" data-page="monitoring" class="nav-item flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <svg class="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    نظارت
+                </a>
+            </nav>
+
+            <!-- Logout -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                <button id="logoutBtn" class="w-full btn bg-red-600 hover:bg-red-700">خروج</button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            
+            <!-- TOP BAR -->
+            <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+                <button id="menuToggle" class="lg:hidden">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <div class="flex items-center gap-4">
+                    <button id="themeToggle" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- PAGES CONTENT -->
+            <div class="flex-1 overflow-auto p-6">
+
+                <!-- Dashboard Page -->
+                <div data-page-content="dashboard" class="hidden">
+                    <div class="mb-6">
+                        <h1 class="text-3xl font-bold mb-2">داشبورد</h1>
+                        <p class="text-gray-600 dark:text-gray-400">خوش آمدید به پنل مدیریت VPN</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                            <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">تنظیمات</p>
+                            <p class="text-3xl font-bold" id="configCount">0</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                            <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">برنامه‌ها</p>
+                            <p class="text-3xl font-bold" id="appCount">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configs Page -->
+                <div data-page-content="configs" class="hidden">
+                    <div class="mb-6">
+                        <h1 class="text-3xl font-bold mb-4">مدیریت تنظیمات VPN</h1>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mb-6">
+                            <h2 class="text-xl font-semibold mb-4">ایجاد تنظیم جدید</h2>
+                            <form id="configForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input type="text" id="configName" class="input-field" placeholder="نام تنظیم" required>
+                                <select id="configType" class="input-field" required>
+                                    <option>نوع تنظیم انتخاب کنید</option>
+                                    <option value="vpn">VPN</option>
+                                    <option value="proxy">Proxy</option>
+                                    <option value="socks">SOCKS</option>
+                                </select>
+                                <input type="text" id="serverAddress" class="input-field" placeholder="آدرس سرور" required>
+                                <input type="number" id="serverPort" class="input-field" placeholder="درگاه" required>
+                                <select id="protocol" class="input-field">
+                                    <option>پروتکل</option>
+                                    <option value="TCP">TCP</option>
+                                    <option value="UDP">UDP</option>
+                                </select>
+                                <input type="text" id="configUsername" class="input-field" placeholder="نام کاربری (اختیاری)">
+                                <input type="password" id="configPassword" class="input-field" placeholder="رمز عبور (اختیاری)">
+                                <button type="submit" class="btn md:col-span-2">ایجاد تنظیم</button>
+                            </form>
+                        </div>
+
+                        <div id="configsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Configs will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Apps Page -->
+                <div data-page-content="apps" class="hidden">
+                    <div class="mb-6">
+                        <h1 class="text-3xl font-bold mb-4">برنامه‌های اندروید</h1>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mb-6">
+                            <h2 class="text-xl font-semibold mb-4">ایجاد برنامه جدید</h2>
+                            <form id="appForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <select id="appConfigSelect" class="input-field" required>
+                                    <option>تنظیم را انتخاب کنید</option>
+                                </select>
+                                <input type="text" id="appName" class="input-field" placeholder="نام برنامه" required>
+                                <input type="text" id="appVersion" class="input-field" placeholder="نسخه (مثال: 1.0.0)" required>
+                                <button type="submit" class="btn md:col-span-2">ایجاد برنامه</button>
+                            </form>
+                        </div>
+
+                        <div id="appsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Apps will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Page -->
+                <div data-page-content="users" class="hidden">
+                    <div class="mb-6">
+                        <h1 class="text-3xl font-bold mb-4">مدیریت کاربران</h1>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mb-6">
+                            <h2 class="text-xl font-semibold mb-4">ایجاد کاربر جدید</h2>
+                            <form id="userForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <select id="userAppSelect" class="input-field" required>
+                                    <option>برنامه را انتخاب کنید</option>
+                                </select>
+                                <input type="text" id="userName" class="input-field" placeholder="نام کاربری" required>
+                                <input type="password" id="userPassword" class="input-field" placeholder="رمز عبور" required>
+                                <input type="email" id="userEmail" class="input-field" placeholder="ایمیل (اختیاری)">
+                                <input type="date" id="expiryDate" class="input-field">
+                                <button type="submit" class="btn md:col-span-2">ایجاد کاربر</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monitoring Page -->
+                <div data-page-content="monitoring" class="hidden">
+                    <div class="mb-6">
+                        <h1 class="text-3xl font-bold mb-4">نظارت بر فعالیت کاربران</h1>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mb-6">
+                            <label class="block mb-2 font-semibold">انتخاب برنامه:</label>
+                            <select id="monitoringAppSelect" class="input-field mb-4" onchange="pageManager.loadAppMonitoring(this.value)">
+                                <option>برنامه را انتخاب کنید</option>
+                            </select>
+                            <div id="monitoringTable" class="overflow-x-auto">
+                                <!-- Monitoring data will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/src/frontend/components/api-service.js"></script>
+    <script src="/src/frontend/components/auth-module.js"></script>
+    <script src="/src/frontend/components/page-manager.js"></script>
+    <script src="/src/frontend/components/form-manager.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load theme preference
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+            
+            // Initialize page manager
+            pageManager.init();
+        });
+    </script>
+</body>
+</html>
