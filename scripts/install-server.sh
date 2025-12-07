@@ -45,14 +45,18 @@ mkdir -p $APP_DIR
 cd $APP_DIR
 
 # Ensure application files are present in /tmp/vpn-backend
-if [ ! -d /tmp/vpn-backend ]; then
-    echo "Downloading application files to /tmp/vpn-backend..."
-    if command -v git >/dev/null 2>&1; then
-        git clone https://github.com/Lucifer-ir/vps.git /tmp/vpn-backend || { echo "git clone failed"; exit 1; }
-    else
-        echo "git not available to fetch repository. Please place backend files in /tmp/vpn-backend and re-run.";
-        exit 1
-    fi
+# Always remove and re-clone to ensure fresh code
+if [ -d /tmp/vpn-backend ]; then
+    echo "Removing stale backend files..."
+    rm -rf /tmp/vpn-backend
+fi
+
+echo "Downloading application files to /tmp/vpn-backend..."
+if command -v git >/dev/null 2>&1; then
+    git clone https://github.com/Lucifer-ir/vps.git /tmp/vpn-backend || { echo "git clone failed"; exit 1; }
+else
+    echo "git not available to fetch repository. Please place backend files in /tmp/vpn-backend and re-run.";
+    exit 1
 fi
 
 # Locate backend source inside the downloaded repo
