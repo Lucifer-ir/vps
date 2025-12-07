@@ -88,15 +88,24 @@ else
     API_BASE_URL_VAL="http://localhost:5000"
 fi
 
+ADMIN_PASSWORD=$(openssl rand -base64 12)
+
 cat > .env << EOF
 PORT=5000
 NODE_ENV=production
 JWT_SECRET=$(openssl rand -base64 32)
 API_BASE_URL=$API_BASE_URL_VAL
 DEFAULT_ADMIN_USERNAME=admin
-DEFAULT_ADMIN_PASSWORD=$(openssl rand -base64 12)
+DEFAULT_ADMIN_PASSWORD=$ADMIN_PASSWORD
 PUBLIC_DOMAIN=$PUBLIC_DOMAIN
 EOF
+
+# Initialize database using Node.js script
+echo "Initializing database..."
+DEFAULT_ADMIN_PASSWORD=$ADMIN_PASSWORD node ./scripts/init-db.js
+if [ $? -ne 0 ]; then
+    echo "Warning: Database initialization had issues, but continuing..."
+fi
 
 # Set permissions
 chown -R nobody:nogroup $APP_DIR
@@ -129,18 +138,10 @@ systemctl start vpn-server
 # Wait for service to start
 sleep 3
 
-# Initialize admin user
-echo "Initializing admin user..."
-sqlite3 $APP_DIR/database/vpn.db << EOF
-INSERT OR IGNORE INTO admins (username, password, email) 
-VALUES ('admin', '\$2b\$10\$example_hash', 'admin@vpn.local');
-EOF
-
 # Read default password from .env so we can show it to the installer
 DEFAULT_PASS=$(grep '^DEFAULT_ADMIN_PASSWORD=' .env | cut -d= -f2-)
 
 # Display login information
-ADMIN_PASSWORD=$(grep DEFAULT_ADMIN_PASSWORD .env | cut -d= -f2)
 ADMIN_IP=$(hostname -I | awk '{print $1}')
 if [ -n "$PUBLIC_DOMAIN" ]; then
     LOGIN_URL="https://$PUBLIC_DOMAIN/admin"
