@@ -16,6 +16,9 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+# Optional: first argument may be the public domain the server will be reachable at
+PUBLIC_DOMAIN="$1"
+
 # Update system
 echo "Updating system packages..."
 apt-get update
@@ -69,13 +72,20 @@ mkdir -p ./database
 
 # Create .env file
 echo "Creating configuration..."
+if [ -n "$PUBLIC_DOMAIN" ]; then
+    API_BASE_URL_VAL="https://$PUBLIC_DOMAIN"
+else
+    API_BASE_URL_VAL="http://localhost:5000"
+fi
+
 cat > .env << EOF
 PORT=5000
 NODE_ENV=production
 JWT_SECRET=$(openssl rand -base64 32)
-API_BASE_URL=http://localhost:5000
+API_BASE_URL=$API_BASE_URL_VAL
 DEFAULT_ADMIN_USERNAME=admin
 DEFAULT_ADMIN_PASSWORD=$(openssl rand -base64 12)
+PUBLIC_DOMAIN=$PUBLIC_DOMAIN
 EOF
 
 # Set permissions
@@ -116,10 +126,17 @@ INSERT OR IGNORE INTO admins (username, password, email)
 VALUES ('admin', '\$2b\$10\$example_hash', 'admin@vpn.local');
 EOF
 
+# Read default password from .env so we can show it to the installer
+DEFAULT_PASS=$(grep '^DEFAULT_ADMIN_PASSWORD=' .env | cut -d= -f2-)
+
 # Display login information
 ADMIN_PASSWORD=$(grep DEFAULT_ADMIN_PASSWORD .env | cut -d= -f2)
 ADMIN_IP=$(hostname -I | awk '{print $1}')
-LOGIN_URL="http://$ADMIN_IP:5000/admin"
+if [ -n "$PUBLIC_DOMAIN" ]; then
+    LOGIN_URL="https://$PUBLIC_DOMAIN/admin"
+else
+    LOGIN_URL="http://$ADMIN_IP:5000/admin"
+fi
 
 echo ""
 echo "=========================================="
@@ -127,7 +144,7 @@ echo "Installation Complete!"
 echo "=========================================="
 echo "Admin Panel URL: $LOGIN_URL"
 echo "Default Username: admin"
-echo "Default Password: Check .env file"
+echo "Default Password: $DEFAULT_PASS"
 echo "Database: $APP_DIR/database/vpn.db"
 echo ""
 echo "Service Status:"

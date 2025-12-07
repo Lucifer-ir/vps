@@ -27,11 +27,21 @@ app.use('/downloads', express.static(path.join(__dirname, '../android/build')));
 // Public routes
 app.use('/api/auth', authRoutes);
 
-// Protected routes (require authentication)
-app.use('/api/admin/config', authMiddleware.adminAuth, configRoutes);
-app.use('/api/admin/users', authMiddleware.adminAuth, userRoutes);
-app.use('/api/admin/monitoring', authMiddleware.adminAuth, monitoringRoutes);
+// Admin-local-only middleware (restrict admin UI and admin APIs to localhost)
+const localOnly = require('./middleware/localOnly');
+
+// Protected admin routes (require authentication + must be local)
+app.use('/api/admin/config', localOnly, authMiddleware.adminAuth, configRoutes);
+app.use('/api/admin/users', localOnly, authMiddleware.adminAuth, userRoutes);
+app.use('/api/admin/monitoring', localOnly, authMiddleware.adminAuth, monitoringRoutes);
 app.use('/api/android', androidRoutes);
+
+// Serve admin UI only to local requests
+app.get('/admin', localOnly, (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/admin.html'));
+});
+// Serve admin static assets (if any) — accessible only locally
+app.use('/admin/static', localOnly, express.static(path.join(__dirname, '../frontend/assets')));
 
 // Health check
 app.get('/api/health', (req, res) => {
